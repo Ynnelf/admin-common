@@ -22,7 +22,7 @@ const user = {
     code: '',
     token: getToken(),
     name: '',
-    avatar: '',
+    avatar: '/app-common/static/avatar_default.png',
     introduction: '',
     roles: [],
     perms: [],
@@ -129,7 +129,6 @@ const user = {
             }
             commit('SET_ROLES', data.roles)
             commit('SET_NAME', data.name)
-            commit('SET_AVATAR', '/static/avatar_default.png')
 
             const treeMenus =
               (data.appInfoDto && data.appInfoDto.menuInfoDtos) || []
@@ -174,7 +173,6 @@ const user = {
           commit('SET_ROLES', data.roles)
           commit('SET_PERMS', data.perms)
           commit('SET_NAME', data.name)
-          commit('SET_AVATAR', '/static/avatar_default.png')
           dispatch('GenerateRoutes', data) // 动态修改权限后 重绘侧边菜单
           resolve()
         })

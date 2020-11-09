@@ -5,14 +5,14 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const name = '最有料用户权限后台' // page title
+const name = '最有料后台-公共模块' // page title
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
 // For example, Mac: sudo npm run
 // You can change the port by the following method:
-// port = 10086 npm run dev OR npm run dev --port = 10086
-const port = process.env.port || process.env.npm_config_port || 10086 // dev port
+// port = 11000 npm run dev OR npm run dev --port = 11000
+const port = process.env.port || process.env.npm_config_port || 11000 // dev port
 
 // All configuration item explanations can be find in https://cli.vuejs.org/config/
 module.exports = {
