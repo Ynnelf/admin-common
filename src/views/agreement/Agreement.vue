@@ -1,5 +1,17 @@
 <template>
   <div class="page-container">
+    <el-tabs
+      v-model="currentAppCode"
+      type="card"
+      @tab-click="toggleTab"
+    >
+      <el-tab-pane
+        v-for="item in appList"
+        :key="item.appId"
+        :label="item.appName"
+        :name="item.appCode"
+      />
+    </el-tabs>
     <el-form
       ref="dataForm"
       :rules="rules"
@@ -21,16 +33,6 @@
         </el-select>
       </el-form-item>
       <el-form-item
-        label="协议内容"
-        prop="protocolContent"
-      >
-        <tinymce
-          v-model="dataForm.protocolContent"
-          :height="600"
-          :renew-flag="renewFlag"
-        />
-      </el-form-item>
-      <el-form-item
         label="协议版本"
         prop="protocolVersion"
       >
@@ -50,6 +52,17 @@
           clearable
         />
       </el-form-item>
+      <el-form-item
+        label="协议内容"
+        prop="protocolContent"
+      >
+        <tinymce
+          v-model="dataForm.protocolContent"
+          :height="600"
+          :renew-flag="renewFlag"
+        />
+      </el-form-item>
+
     </el-form>
 
     <div class="btns-wrap">
@@ -67,6 +80,7 @@
 <script>
 import Tinymce from '@/components/Tinymce'
 import { apiProtocolInfo, apiSaveProtocol } from '@/api'
+import { apiAppAuthTrees } from '@/api/auth'
 import refreshDataMixin from '@/mixins/refreshDataMixin'
 export default {
   name: 'AgreementEdit',
@@ -92,6 +106,7 @@ export default {
       },
       dataForm: {
         id: null,
+        appCode: '',
         protocolCode: '',
         protocolContent: '',
         protocolTitle: '',
@@ -102,16 +117,24 @@ export default {
         { label: '用户注册协议', value: 1 },
         { label: '获取手机号协议', value: 2 }
       ],
-      currentType: 0,
+      currentType: 0, // 协议类型 0：隐私协议 1：用户注册协议 2：获取手机号协议
       renewFlag: 0,
-      isNetBlocking: false
+      isNetBlocking: false,
+      currentAppCode: '',
+      appList: ''
     }
   },
   created() {
     this.refreshData()
   },
   methods: {
-    refreshData() {
+    async refreshData() {
+      this.currentAppCode = this.$cookies.get('__PROTOCOL_EDIT_TAB__') || ''
+      if (this.currentAppCode) {
+        this.getAppList()
+      } else {
+        await this.getAppList()
+      }
       this.getProtocolInfo()
     },
     refreshRichTextEditor() {
@@ -122,7 +145,10 @@ export default {
       try {
         const {
           data: { entity = {} }
-        } = await apiProtocolInfo({ protocolType: this.currentType })
+        } = await apiProtocolInfo({
+          protocolType: this.currentType,
+          selectedAppCode: this.currentAppCode
+        })
         const {
           id = null,
           protocolCode = this.currentType,
@@ -150,6 +176,7 @@ export default {
         return
       }
       try {
+        this.dataForm.appCode = this.currentAppCode
         await apiSaveProtocol(this.dataForm)
         this.$message({
           message: '保存成功',
@@ -164,17 +191,54 @@ export default {
     },
     onSelectChange(val) {
       this.getProtocolInfo()
-      // console.log(val)
       // if (val === 1) {
-      //   this.protocolContent = '床前明月光，疑是地上霜'
+      //   this.$set(this.dataForm, 'protocolContent', '床前明月光，疑是地上霜')
       //   this.refreshRichTextEditor()
       // } else if (val === 2) {
-      //   this.protocolContent = '葡萄美酒月光，欲饮琵琶马上催'
+      //   this.$set(
+      //     this.dataForm,
+      //     'protocolContent',
+      //     '葡萄美酒月光，欲饮琵琶马上催'
+      //   )
       //   this.refreshRichTextEditor()
       // } else {
-      //   this.protocolContent = '我寄愁心与明月，随风直到夜郎西'
+      //   this.$set(
+      //     this.dataForm,
+      //     'protocolContent',
+      //     '我寄愁心与明月，随风直到夜郎西'
+      //   )
       //   this.refreshRichTextEditor()
       // }
+    },
+    async getAppList() {
+      try {
+        const {
+          data: { entity = [] }
+        } = await apiAppAuthTrees()
+        const appItems = entity || []
+        const appList = []
+        appItems.forEach(singleApp => {
+          appList.push({
+            appId: singleApp.id,
+            appCode: singleApp.appCode,
+            appName: singleApp.appName,
+            treeList: singleApp.menuInfoDtos
+          })
+        })
+        this.appList = appList
+        console.log('this.appList ', this.appList)
+        this.currentAppCode =
+          this.$cookies.get('__PROTOCOL_EDIT_TAB__') || this.appList[0].appCode
+        return appList
+      } catch (error) {
+        this.$commonFunc.alertError(error)
+        return Promise.reject(error)
+      }
+    },
+    toggleTab(e) {
+      this.$cookies.set('__PROTOCOL_EDIT_TAB__', this.currentAppCode)
+      this.$refs.dataForm.clearValidate()
+      this.getProtocolInfo()
     }
   }
 }
@@ -182,11 +246,27 @@ export default {
 
 <style lang="scss" scoped>
 .page-container {
+  /deep/ .el-tabs {
+    margin-bottom: 30px;
+    .el-tabs__item {
+      &.is-active {
+        background: #1890ff;
+        border-color: #1890ff;
+        color: #fff;
+        &:hover {
+          color: #fff;
+        }
+      }
+      &:hover {
+        color: #1890ff;
+      }
+    }
+  }
   .editor-protocolContent {
     margin-top: 20px;
   }
-  /deep/ .el-select {
-    margin-bottom: 20px;
+  /deep/ .el-input {
+    width: 400px;
   }
   .btns-wrap {
     padding: 40px 20px;

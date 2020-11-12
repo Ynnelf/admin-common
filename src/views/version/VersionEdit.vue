@@ -7,6 +7,22 @@
       label-width="80px"
     >
       <el-form-item
+        label="应用"
+        prop="appCode"
+      >
+        <el-select
+          v-model="dataForm.appCode"
+          placeholder="请选择应用"
+        >
+          <el-option
+            v-for="item in appOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item
         label="版本号"
         prop="version"
       >
@@ -66,14 +82,11 @@
       >
         <el-upload
           class="upload-app"
-          :action="uploadPathAppFile"
-          :before-upload="beforeFileUpload"
-          :on-success="handleFileSuccess"
-          :on-error="handleFileError"
-          :on-exceed="handleFileExceed"
           :show-file-list="false"
-          :file-list="fileList"
-          :limit="1"
+          :before-upload="beforeAppUpload"
+          :http-request="handleAppUpload"
+          :disabled="isUploading"
+          action=""
         >
           <el-button
             v-if="!dataForm.appUrl"
@@ -142,6 +155,9 @@ export default {
         } = await apiVersionInfo({ id: this.id })
         this.dataForm = entity
         console.log(this.dataForm, 2333)
+        this.filename = this.dataForm.appUrl.slice(
+          this.dataForm.appUrl.lastIndexOf('/') + 1
+        )
       } catch (error) {
         this.$commonFunc.alertError(error)
       }

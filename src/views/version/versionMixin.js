@@ -1,5 +1,5 @@
 import { uploadPathAppFile } from '@/api/storage'
-import { apiSaveVersion } from '@/api'
+import { apiSaveVersion, apiUploadVersion } from '@/api'
 import { apiProjectList } from '@/api/auth'
 
 export default {
@@ -77,14 +77,8 @@ export default {
       renewFlag: 0,
       isNetBlocking: false,
       isUploading: false,
-      fileList: []
-    }
-  },
-  computed: {
-    filename() {
-      return this.dataForm.appUrl.slice(
-        this.dataForm.appUrl.lastIndexOf('/') + 1
-      )
+      fileList: [],
+      filename: ''
     }
   },
   created() {
@@ -106,17 +100,45 @@ export default {
       })
       this.appOptions = options
     },
-    beforeFileUpload(file) {
-      console.log(file.type)
+    // beforeFileUpload(file) {
+    //   console.log(file.type)
+    //   this.isUploading = true
+    // },
+    // handleFileSuccess(response) {
+    //   const { entity = {} } = response
+    //   this.$set(this.dataForm, 'appUrl', entity && entity.url)
+    //   this.isUploading = false
+    // },
+    // handleFileError() {
+    //   this.isUploading = false
+    // },
+    beforeAppUpload(file) {
+      if (!this.dataForm.appCode) {
+        this.$message({
+          message: '请先选择所属应用',
+          type: 'warning'
+        })
+        return false
+      }
+      return true
+    },
+    async handleAppUpload(request) {
+      const fd = new FormData()
+      fd.append('file', request.file)
+      const params = { appCode: this.dataForm.appCode }
       this.isUploading = true
-    },
-    handleFileSuccess(response) {
-      const { entity = {} } = response
-      this.$set(this.dataForm, 'appUrl', entity && entity.url)
-      this.isUploading = false
-    },
-    handleFileError() {
-      this.isUploading = false
+      try {
+        const {
+          data: { entity = {} }
+        } = await apiUploadVersion(fd, params)
+        console.log(entity, 8888888888)
+        this.$set(this.dataForm, 'appUrl', entity.url)
+        this.filename = entity.fileName // 注意 接口返回的fileName  N 是大写的
+        this.isUploading = false
+      } catch (error) {
+        this.isUploading = false
+        this.$commonFunc.alertError(error)
+      }
     },
     handleFileExceed(files, fileList) {
       this.$message.error('只能上传一个文件包，请打包并压缩后上传！')

@@ -10,6 +10,18 @@
         @click="handleCreate"
       >添加版本</el-button>
     </div>
+    <el-tabs
+      v-model="currentAppCode"
+      type="card"
+      @tab-click="toggleTab"
+    >
+      <el-tab-pane
+        v-for="item in appList"
+        :key="item.appId"
+        :label="item.appName"
+        :name="item.appCode"
+      />
+    </el-tabs>
     <div class="filter-container">
       <el-input
         v-model="listQuery.condition.version"
@@ -204,6 +216,7 @@ import BackToTop from '@/components/BackToTop'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import refreshDataMixin from '@/mixins/refreshDataMixin'
 import { apiVersionList } from '@/api'
+import { apiAppAuthTrees } from '@/api/auth'
 import { pickerOptions } from '@/utils'
 
 export default {
@@ -222,6 +235,7 @@ export default {
         current: 1,
         limit: 20,
         condition: {
+          appCode: '',
           terminalType: '',
           updatedTimeStart: '',
           updatedTimeEnd: '',
@@ -237,6 +251,8 @@ export default {
       },
       dataFormVisible: false,
       dialogStatus: 'create',
+      appList: [],
+      currentAppCode: '',
       rules: {
         name: [
           {
@@ -307,12 +323,19 @@ export default {
     }
   },
   methods: {
-    refreshData() {
+    async refreshData() {
       this.resetListQuery()
+      this.currentAppCode = this.$cookies.get('__VERSION_EDIT_TAB__') || ''
+      if (this.currentAppCode) {
+        this.getAppList()
+      } else {
+        await this.getAppList()
+      }
       this.getMainList()
     },
     async getMainList() {
       this.listLoading = true
+      this.listQuery.condition.appCode = this.currentAppCode
       try {
         const {
           data: { entity = {} }
@@ -329,7 +352,7 @@ export default {
     },
     handleCreate() {
       this.$router.push({
-        path: '/operate/version/VersionCreate',
+        path: '/version/VersionCreate',
         query: {
           timestamp: Date.now()
         }
@@ -337,7 +360,7 @@ export default {
     },
     handleEdit(row) {
       this.$router.push({
-        path: '/operate/version/VersionEdit',
+        path: '/version/VersionEdit',
         query: {
           id: row.id,
           timestamp: Date.now()
@@ -363,12 +386,58 @@ export default {
     },
     onCopySuccess() {
       this.$message.success('已复制')
+    },
+    toggleTab(e) {
+      this.$cookies.set('__VERSION_EDIT_TAB__', this.currentAppCode)
+      console.log(this.currentAppCode)
+      this.getMainList()
+    },
+    async getAppList() {
+      try {
+        const {
+          data: { entity = [] }
+        } = await apiAppAuthTrees()
+        const appItems = entity || []
+        const appList = []
+        appItems.forEach(singleApp => {
+          appList.push({
+            appId: singleApp.id,
+            appCode: singleApp.appCode,
+            appName: singleApp.appName,
+            treeList: singleApp.menuInfoDtos
+          })
+        })
+        this.appList = appList
+        console.log('this.appList ', this.appList)
+        this.currentAppCode =
+          this.$cookies.get('__VERSION_EDIT_TAB__') || this.appList[0].appCode
+        return appList
+      } catch (error) {
+        this.$commonFunc.alertError(error)
+        return Promise.reject(error)
+      }
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+/deep/ .el-tabs {
+  margin-bottom: 30px;
+  .el-tabs__item {
+    &.is-active {
+      background: #1890ff;
+      border-color: #1890ff;
+      color: #fff;
+      &:hover {
+        color: #fff;
+      }
+    }
+    &:hover {
+      color: #1890ff;
+    }
+  }
+}
 /deep/.main-table {
   .img-avatar {
     display: inline-block;

@@ -1,6 +1,5 @@
 import request from '@/utils/request'
 import AxiosClass from '@/utils/AxiosClass'
-const PREFIX_INFO = '/information'
 const PREFIX_AUTH = '/upas'
 const PREFIX_CUSTOMER = '/customer'
 
@@ -184,6 +183,15 @@ export const apiUploadVideo = data => {
 
 /** *********** 版本管理 start   ***************/
 
+// 应用列表
+export const apiAppList = params => {
+  return request({
+    url: PREFIX_AUTH + '/menu/getMenus',
+    method: 'get',
+    params
+  })
+}
+
 // 版本列表
 export const apiVersionList = data => {
   return request({
@@ -201,4 +209,43 @@ export const apiSaveVersion = data => {
     data
   })
 }
+
+// 上传新版本
+export const apiUploadVersion = (data, params) => {
+  return request({
+    url: PREFIX_AUTH + '/app_version/upload',
+    method: 'post',
+    data,
+    params
+  })
+}
+
+// 根据 id 获取版本信息
+export const apiVersionInfo = params => {
+  return request({
+    url: PREFIX_AUTH + '/app_version/get',
+    method: 'post',
+    params
+  })
+}
 /** *********** 版本管理 end   ***************/
+
+/** *********** 协议管理 end   ***************/
+// 查询协议
+export const apiProtocolInfo = params => {
+  return request({
+    url: PREFIX_AUTH + '/protocol/admin/info',
+    method: 'get',
+    params
+  })
+}
+
+// 保存协议
+export const apiSaveProtocol = data => {
+  return request({
+    url: PREFIX_AUTH + '/protocol/admin/save',
+    method: 'post',
+    data
+  })
+}
+/** *********** 协议管理 end   ***************/

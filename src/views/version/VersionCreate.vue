@@ -8,7 +8,7 @@
     >
       <el-form-item
         label="应用"
-        prop="version"
+        prop="appCode"
       >
         <el-select
           v-model="dataForm.appCode"
@@ -82,15 +82,11 @@
       >
         <el-upload
           class="upload-app"
-          :action="uploadPathAppFile"
-          :before-upload="beforeFileUpload"
-          :on-success="handleFileSuccess"
-          :on-error="handleFileError"
-          :on-exceed="handleFileExceed"
           :show-file-list="false"
-          :file-list="fileList"
-          :limit="1"
+          :before-upload="beforeAppUpload"
+          :http-request="handleAppUpload"
           :disabled="isUploading"
+          action=""
         >
           <el-button
             v-if="!dataForm.appUrl"
@@ -134,7 +130,9 @@ export default {
   name: 'VersionCreate',
   mixins: [refreshDataMixin, versionMixin],
   data() {
-    return {}
+    return {
+      appOptions: ''
+    }
   },
   computed: {},
   methods: {
