@@ -14,20 +14,25 @@ function hasPermission(deniedPerms, permissions) {
 }
 
 const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
+let reloadFunc = false
 
 router.beforeEach((to, from, next) => {
   const authkey = to.query.authkey
   if (authkey && authkey !== getToken()) {
+    store.commit('SET_TOKEN', authkey)
     setToken(authkey)
-    setTimeout(() => {
+    reloadFunc = function() {
       window.location.href = window.location.href
         .split('authkey')[0]
         .slice(0, -1)
-      window.location.reload()
-    }, 300)
+      window.reload()
+    }
   }
   NProgress.start() // start progress bar
   if (getToken()) {
+    if (!store.getters.token) {
+      store.commit('SET_TOKEN', getToken())
+    }
     // determine if there has token
     /* has token*/
     if (to.path === '/login') {
@@ -75,4 +80,8 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach(() => {
   NProgress.done() // finish progress bar
+  if (reloadFunc) {
+    reloadFunc()
+    reloadFunc = false
+  }
 })

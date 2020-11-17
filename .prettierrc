@@ -6,5 +6,7 @@
   "useTabs": false,
   "indent_style": "space",
   "indent_size": 10,
-  "eslint.autoFixOnSave": true
+  "eslint.autoFixOnSave": true,
+  "trailingComma": "none",
+  "arrowParens": "avoid"
 }
