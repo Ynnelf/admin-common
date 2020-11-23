@@ -9,6 +9,7 @@
     "build": "vue-cli-service build --mode production",
     "build:prod": "vue-cli-service build --mode production",
     "build:dep": "vue-cli-service build --mode dep",
+    "build:pre": "vue-cli-service build --mode pre",
     "preview": "node build/index.js --preview",
     "lint": "eslint --ext .js,.vue src",
     "test:unit": "jest --clearCache && vue-cli-service test:unit",
