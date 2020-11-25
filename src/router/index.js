@@ -85,18 +85,18 @@ export default new Router({
 })
 
 export const asyncRouterMap = [
-  {
-    path: '/dynamic-menu',
-    component: Layout,
-    children: [
-      {
-        path: '',
-        component: () => import('@/views/dynamicMenu/index'),
-        name: 'dynamicMenu',
-        meta: { title: '动态菜单', icon: 'list' }
-      }
-    ]
-  },
+  // {
+  //   path: '/dynamic-menu',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: '',
+  //       component: () => import('@/views/dynamicMenu/index'),
+  //       name: 'dynamicMenu',
+  //       meta: { title: '动态菜单', icon: 'list' }
+  //     }
+  //   ]
+  // },
   {
     path: '/system',
     name: 'system',
