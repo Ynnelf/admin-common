@@ -210,9 +210,9 @@ export const apiSaveVersion = data => {
   })
 }
 
-// 上传新版本
+// 上传新版本 放开连接时长
 export const apiUploadVersion = (data, params) => {
-  return request({
+  return new AxiosClass({ contentType: 'multipart/form-data' }).request({
     url: PREFIX_AUTH + '/app_version/upload',
     method: 'post',
     data,
