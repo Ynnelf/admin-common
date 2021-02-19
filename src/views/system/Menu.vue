@@ -21,11 +21,12 @@
     </el-tabs>
     <div class="app-info-container">
       <el-tag>{{ currentAppItem.appName }} / {{ currentAppItem.appCode }}</el-tag>
+      <el-tag type="info">{{ currentAppItem.domain }}</el-tag>
       <el-button
         style="color:#999;margin-left:12px;"
         type="text"
         @click="showAppDialog('update',currentAppItem)"
-      >修改应用名称</el-button>
+      >修改应用</el-button>
       <el-button
         v-if="currentAppItem.treeList && currentAppItem.treeList.length === 0"
         style="color:#ff4949;margin-left:12px;"
@@ -145,6 +146,15 @@
         >
           <el-input
             v-model.trim="appForm.appCode"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item
+          label="应用域名"
+          prop="domain"
+        >
+          <el-input
+            v-model.trim="appForm.domain"
             clearable
           />
         </el-form-item>
@@ -321,6 +331,11 @@ export default {
           message: '请输入应用代号',
           trigger: 'blur'
         },
+        domain: {
+          required: true,
+          message: '请输入应用域名',
+          trigger: 'blur'
+        },
         type: {
           required: true,
           message: '请选择节点类型',
@@ -351,7 +366,8 @@ export default {
       appForm: {
         id: null, // 应用id
         appName: '', // 应用名
-        appCode: '' // 应用代号
+        appCode: '', // 应用代号
+        domain: '' // 应用域名
       },
       typeRadioDisabled: false,
       isNetBlocking: false
@@ -463,14 +479,14 @@ export default {
         const data = {
           id: this.appForm.appId,
           appCode: this.appForm.appCode,
-          appName: this.appForm.appName
+          appName: this.appForm.appName,
+          domain: this.appForm.domain
         }
         console.log('update-app-data', data)
         this.isNetBlocking = true
         await apiUpdateProject(data)
         this.dialogAppVisible = false
         this.isNetBlocking = false
-        this.$cookies.set('__MENU_EDIT_TAB__', '')
         this.refreshData()
       } catch (error) {
         this.isNetBlocking = false
@@ -489,6 +505,7 @@ export default {
             appId: singleApp.id,
             appCode: singleApp.appCode,
             appName: singleApp.appName,
+            domain: singleApp.domain,
             treeList: singleApp.menuInfoDtos
           })
         })
@@ -693,6 +710,9 @@ export default {
     showAppDialog(status, item) {
       this.dialogAppVisible = true
       this.dialogAppStatus = status
+      this.$nextTick(() => {
+        this.$refs.appForm.clearValidate()
+      })
       if (status === 'update') {
         this.appForm = Object.assign({}, item)
       } else {
@@ -703,7 +723,8 @@ export default {
       this.appForm = {
         id: null, // 应用id
         appName: '', // 应用名
-        appCode: '' // 应用代号
+        appCode: '', // 应用代号
+        domain: '' // 应用域名
       }
     },
     resetMainForm() {
