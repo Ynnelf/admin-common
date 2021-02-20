@@ -119,14 +119,11 @@ const user = {
             } catch (error) {
               console.error(error)
             }
-            if (deniedPermList.length > 0) {
-              // 验证返回的perms是否是一个非空数组
-              commit('SET_DENIED_PERMS', deniedPerms)
-            } else {
+            if (deniedPerms.length === 0) {
+              // 验证返回的perms是否是一个空数组
               deniedPerms.push('no-denied-perm') // 占个位  避免一个没有勾选任何权限的账号登录错误
-              commit('SET_DENIED_PERMS', deniedPerms)
-              // reject('getInfo: perms must be a non-null array !')
             }
+            commit('SET_DENIED_PERMS', deniedPerms)
             commit('SET_ROLES', data.roles)
             commit('SET_NAME', data.name)
 
