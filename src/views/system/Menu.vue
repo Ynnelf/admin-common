@@ -20,7 +20,13 @@
       />
     </el-tabs>
     <div class="app-info-container">
-      <el-tag>{{ currentAppItem.appName }} / {{ currentAppItem.appCode }}</el-tag>
+      <el-tag>
+        <i
+          v-if="currentAppItem.isAdminApp === 1"
+          class="icon-pc el-icon-s-platform"
+        />
+        {{ currentAppItem.appName }} / {{ currentAppItem.appCode }}
+      </el-tag>
       <el-tag type="info">{{ currentAppItem.domain }}</el-tag>
       <el-button
         style="color:#999;margin-left:12px;"
@@ -156,6 +162,19 @@
           <el-input
             v-model.trim="appForm.domain"
             clearable
+          />
+        </el-form-item>
+        <el-form-item
+          label="管理后台？"
+          prop="isAdminApp"
+        >
+          <el-switch
+            :value="appForm.isAdminApp === 1"
+            active-text="是"
+            inactive-text="否"
+            active-color="#409eff"
+            inactive-color="#c3c3c3"
+            @change="onSwitchChange"
           />
         </el-form-item>
       </el-form>
@@ -367,7 +386,8 @@ export default {
         id: null, // 应用id
         appName: '', // 应用名
         appCode: '', // 应用代号
-        domain: '' // 应用域名
+        domain: '', // 应用域名
+        isAdminApp: 1 // 是否管理后台   1 ->是 , 0 -> 否
       },
       typeRadioDisabled: false,
       isNetBlocking: false
@@ -431,8 +451,15 @@ export default {
         return
       }
       try {
+        const data = {
+          id: this.appForm.appId,
+          appCode: this.appForm.appCode,
+          appName: this.appForm.appName,
+          domain: this.appForm.domain,
+          isAdminApp: this.appForm.isAdminApp ? 1 : 0
+        }
         this.isNetBlocking = true
-        await apiCreateProject(this.appForm)
+        await apiCreateProject(data)
         this.dialogAppVisible = false
         this.$notify.success({
           title: '成功',
@@ -480,9 +507,9 @@ export default {
           id: this.appForm.appId,
           appCode: this.appForm.appCode,
           appName: this.appForm.appName,
-          domain: this.appForm.domain
+          domain: this.appForm.domain,
+          isAdminApp: this.appForm.isAdminApp ? 1 : 0
         }
-        console.log('update-app-data', data)
         this.isNetBlocking = true
         await apiUpdateProject(data)
         this.dialogAppVisible = false
@@ -506,6 +533,7 @@ export default {
             appCode: singleApp.appCode,
             appName: singleApp.appName,
             domain: singleApp.domain,
+            isAdminApp: singleApp.isAdminApp,
             treeList: singleApp.menuInfoDtos
           })
         })
@@ -635,6 +663,9 @@ export default {
         children: this.currentAppTree
       }
     },
+    onSwitchChange(newVal) {
+      this.$set(this.appForm, 'isAdminApp', newVal ? 1 : 0)
+    },
     async onDragEnd(draggingNode, dropNode, dropType, ev) {
       console.log('draggingNode', draggingNode)
       console.log('dropNode', dropNode)
@@ -724,7 +755,8 @@ export default {
         id: null, // 应用id
         appName: '', // 应用名
         appCode: '', // 应用代号
-        domain: '' // 应用域名
+        domain: '', // 应用域名
+        isAdminApp: 1 // 是否管理后台   1 ->是 , 0 -> 否
       }
     },
     resetMainForm() {
@@ -766,6 +798,13 @@ export default {
   }
   .app-info-container {
     margin-bottom: 30px;
+    .icon-pc {
+      position: relative;
+      margin-right: 1px;
+      top: 2px;
+      font-size: 18px;
+      color: #1890ff;
+    }
   }
   /deep/.el-tree {
     .el-tree-node {
