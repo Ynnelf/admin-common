@@ -659,6 +659,7 @@ export default {
       this.mainForm.type = 1
       this.dialogFormVisible = true
       this.typeRadioDisabled = true
+      this.dialogStatus = 'create'
       this.currentData = {
         children: this.currentAppTree
       }
