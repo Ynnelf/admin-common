@@ -231,6 +231,15 @@ export const apiVersionInfo = params => {
 /** *********** 版本管理 end   ***************/
 
 /** *********** 协议管理 end   ***************/
+// 协议类型列表
+export const apiProtocolTypeList = params => {
+  return request({
+    url: PREFIX_AUTH + '/protocol/admin/getProtocoListTypes',
+    method: 'get',
+    params
+  })
+}
+
 // 查询协议
 export const apiProtocolInfo = params => {
   return request({

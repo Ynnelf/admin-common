@@ -25,7 +25,7 @@
           @change="onSelectChange"
         >
           <el-option
-            v-for="item in protocolOptions"
+            v-for="item in protocolTypeOptions"
             :key="item.value"
             :label="item.label"
             :value="item.value"
@@ -79,7 +79,7 @@
 
 <script>
 import Tinymce from '@/components/Tinymce'
-import { apiProtocolInfo, apiSaveProtocol } from '@/api'
+import { apiProtocolInfo, apiSaveProtocol, apiProtocolTypeList } from '@/api'
 import { apiAppAuthTrees } from '@/api/auth'
 import refreshDataMixin from '@/mixins/refreshDataMixin'
 export default {
@@ -112,7 +112,7 @@ export default {
         protocolTitle: '',
         protocolVersion: ''
       },
-      protocolOptions: [
+      protocolTypeOptions: [
         { label: '隐私协议', value: 0 },
         { label: '用户注册协议', value: 1 },
         { label: '获取手机号协议', value: 2 }
@@ -129,6 +129,7 @@ export default {
   },
   methods: {
     async refreshData() {
+      this.getTypeOptions()
       this.currentAppCode = this.$cookies.get('__PROTOCOL_EDIT_TAB__') || ''
       if (this.currentAppCode) {
         this.getAppList()
@@ -139,6 +140,26 @@ export default {
     },
     refreshRichTextEditor() {
       this.renewFlag++
+    },
+    async getTypeOptions() {
+      try {
+        const {
+          data: { entity = [] }
+        } = await apiProtocolTypeList()
+        const options = []
+        entity.forEach(item => {
+          const key = parseInt(Object.keys(item)[0])
+          options.push({
+            value: key,
+            label: item[key]
+          })
+        })
+        this.protocolTypeOptions = options || []
+        return options
+      } catch (error) {
+        this.$commonFunc.alertError(error)
+        return Promise.reject(error)
+      }
     },
     async getProtocolInfo() {
       this.isNetBlocking = true
@@ -168,6 +189,31 @@ export default {
       } catch (error) {
         this.isNetBlocking = false
         this.$commonFunc.alertError(error)
+      }
+    },
+    async getAppList() {
+      try {
+        const {
+          data: { entity = [] }
+        } = await apiAppAuthTrees()
+        const appItems = entity || []
+        const appList = []
+        appItems.forEach(singleApp => {
+          appList.push({
+            appId: singleApp.id,
+            appCode: singleApp.appCode,
+            appName: singleApp.appName,
+            treeList: singleApp.menuInfoDtos
+          })
+        })
+        this.appList = appList
+        console.log('this.appList ', this.appList)
+        this.currentAppCode =
+          this.$cookies.get('__PROTOCOL_EDIT_TAB__') || this.appList[0].appCode
+        return appList
+      } catch (error) {
+        this.$commonFunc.alertError(error)
+        return Promise.reject(error)
       }
     },
     async onUpdateData() {
@@ -209,31 +255,6 @@ export default {
       //   )
       //   this.refreshRichTextEditor()
       // }
-    },
-    async getAppList() {
-      try {
-        const {
-          data: { entity = [] }
-        } = await apiAppAuthTrees()
-        const appItems = entity || []
-        const appList = []
-        appItems.forEach(singleApp => {
-          appList.push({
-            appId: singleApp.id,
-            appCode: singleApp.appCode,
-            appName: singleApp.appName,
-            treeList: singleApp.menuInfoDtos
-          })
-        })
-        this.appList = appList
-        console.log('this.appList ', this.appList)
-        this.currentAppCode =
-          this.$cookies.get('__PROTOCOL_EDIT_TAB__') || this.appList[0].appCode
-        return appList
-      } catch (error) {
-        this.$commonFunc.alertError(error)
-        return Promise.reject(error)
-      }
     },
     toggleTab(e) {
       this.$cookies.set('__PROTOCOL_EDIT_TAB__', this.currentAppCode)
