@@ -13,7 +13,7 @@ function hasPermission(deniedPerms, permissions) {
   return !deniedPerms.some(deniedPerm => permissions.indexOf(deniedPerm) >= 0)
 }
 
-const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
+const whiteList = ['/login', '/LoginForDeveloper', '/auth-redirect'] // no redirect whitelist
 let reloadFunc = false
 
 router.beforeEach((to, from, next) => {

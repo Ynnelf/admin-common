@@ -21,3 +21,8 @@ export const cropOption = {
 }
 
 export const appCode = 'ADMIN-UPAS'
+
+export const portalLoginPage =
+  process.env.VUE_APP_ENV === 'production'
+    ? 'https://portal.zuiyouliao.com'
+    : 'https://portaltest.zuiyouliao.com/'

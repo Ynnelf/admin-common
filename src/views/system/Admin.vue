@@ -50,8 +50,17 @@
         align="center"
         label="用户姓名"
         prop="name"
-      />
-
+      >
+        <template slot-scope="{row}">
+          <span>
+            {{ row.name }}
+          </span>
+          <el-tag
+            v-if="row.state === 1 "
+            type="danger"
+          >已禁用</el-tag>
+        </template>
+      </el-table-column> -->
       <!-- <el-table-column
         align="center"
         label="管理员头像"
@@ -102,6 +111,19 @@
               size="mini"
               @click="handleUpdate(row)"
             >编辑</el-button>
+            <el-button
+              v-if="row.state === 0"
+              type="warning"
+              size="mini"
+              @click="handleForbid(row)"
+            >禁用</el-button>
+            <el-button
+              v-else
+              type="success"
+              size="mini"
+              plain
+              @click="handleEnable(row)"
+            >启用</el-button>
             <el-button
               v-permission="['DELETE /upas/user/{id}']"
               type="danger"
@@ -235,7 +257,8 @@ import {
   apiListAdmin,
   apiCreateAdmin,
   apiUpdateAdmin,
-  apiDeleteAdmin
+  apiDeleteAdmin,
+  apiForbidUser
 } from '@/api'
 import { uploadPath } from '@/api/storage'
 import { getToken, apiAllProjectRoles } from '@/api/auth'
@@ -430,6 +453,23 @@ export default {
           }
         })
         .catch(() => {})
+    },
+    async handleForbid(row) {
+      console.log(row)
+      try {
+        await apiForbidUser({ userId: row.id, state: 1 })
+        this.getMainList()
+      } catch (error) {
+        this.$commonFunc.alertError(error)
+      }
+    },
+    async handleEnable(row) {
+      try {
+        await apiForbidUser({ userId: row.id, state: 0 })
+        this.getMainList()
+      } catch (error) {
+        this.$commonFunc.alertError(error)
+      }
     },
     onCreateData() {
       this.setRoleIds()

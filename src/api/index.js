@@ -159,6 +159,14 @@ export const apiDeviceIdList = data => {
   })
 }
 
+export const apiForbidUser = params => {
+  return request({
+    url: PREFIX_AUTH + '/user/upas/updateState',
+    method: 'post',
+    params
+  })
+}
+
 /** *********** 系统管理相关 end   *************/
 
 /** ***********  文件上传 操作 start  *************/

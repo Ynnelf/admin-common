@@ -42,6 +42,11 @@ export const constantRouterMap = [
     hidden: true
   },
   {
+    path: '/LoginForDeveloper',
+    component: () => import('@/views/login/LoginForDeveloper'),
+    hidden: true
+  },
+  {
     path: '/auth-redirect',
     component: () => import('@/views/login/authredirect'),
     hidden: true
