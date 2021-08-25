@@ -113,12 +113,14 @@
             >编辑</el-button>
             <el-button
               v-if="row.state === 0"
+              v-permission="['POST /upas/user/upas/updateState']"
               type="warning"
               size="mini"
               @click="handleForbid(row)"
             >禁用</el-button>
             <el-button
               v-else
+              v-permission="['POST /upas/user/upas/updateState']"
               type="success"
               size="mini"
               plain
