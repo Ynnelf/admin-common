@@ -2,33 +2,84 @@
   <div class="login-container">
     <el-form
       ref="loginForm"
+      :model="loginForm"
+      :rules="loginRules"
       class="login-form"
       auto-complete="on"
       label-position="left"
     >
       <div class="title-container">
-        <h3 class="title">登录提示</h3>
+        <h3 class="title">管理员登录</h3>
       </div>
-      <el-tag
-        class="login-tips"
-        type="warning"
-      >现在统一使用最有料多平台管理系统进行登录</el-tag>
+      <el-form-item prop="userName">
+        <span class="svg-container">
+          <svg-icon icon-class="user" />
+        </span>
+        <el-input
+          v-model="loginForm.userName"
+          name="userName"
+          type="text"
+          tabindex="1"
+          auto-complete="on"
+          placeholder="管理员账户"
+        />
+      </el-form-item>
+
+      <el-form-item prop="password">
+        <span class="svg-container">
+          <svg-icon icon-class="password" />
+        </span>
+        <el-input
+          v-model="loginForm.password"
+          :type="passwordType"
+          name="password"
+          auto-complete="on"
+          tabindex="2"
+          show-password
+          placeholder="管理员密码"
+          @keyup.enter.native="handleLogin"
+        />
+      </el-form-item>
+
       <el-button
+        :loading="isLoading"
         type="primary"
         style="width:100%;margin-bottom:30px;"
-        @click.native.prevent="onJump"
-      >确定跳转</el-button>
+        @click.native.prevent="handleLogin"
+      >登录</el-button>
     </el-form>
 
   </div>
 </template>
 
 <script>
-import { portalLoginPage } from '@/config'
 export default {
   name: 'Login',
   data() {
-    return {}
+    const validatePassword = (rule, value, callback) => {
+      if (value.length < 6) {
+        callback(new Error('管理员密码长度应大于6'))
+      } else {
+        callback()
+      }
+    }
+    return {
+      loginForm: {
+        userName: '',
+        password: ''
+      },
+      loginRules: {
+        userName: [
+          { required: true, message: '管理员账户不允许为空', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '管理员密码不允许为空', trigger: 'blur' },
+          { validator: validatePassword, trigger: 'blur' }
+        ]
+      },
+      passwordType: 'password',
+      isLoading: false
+    }
   },
   watch: {
     $route: {
@@ -45,8 +96,29 @@ export default {
     // window.removeEventListener('hashchange', this.afterQRScan)
   },
   methods: {
-    onJump() {
-      window.location.href = portalLoginPage
+    handleLogin() {
+      this.$refs.loginForm.validate(valid => {
+        if (valid && !this.isLoading) {
+          this.isLoading = true
+          this.$store
+            .dispatch('actionLogin', this.loginForm)
+            .then(res => {
+              console.log(res)
+              this.isLoading = false
+              this.$router.push({ path: this.redirect || '/' })
+            })
+            .catch(error => {
+              console.log(error)
+              this.$notify.error({
+                title: '失败',
+                message: error.data.message
+              })
+              this.isLoading = false
+            })
+        } else {
+          return false
+        }
+      })
     }
   }
 }
@@ -109,6 +181,7 @@ $light_gray: #eee;
   width: 100%;
   background-color: $bg;
   overflow: hidden;
+
   .login-form {
     position: relative;
     width: 520px;
@@ -117,6 +190,7 @@ $light_gray: #eee;
     margin: 0 auto;
     overflow: hidden;
   }
+
   .svg-container {
     padding: 6px 5px 6px 15px;
     color: $dark_gray;
@@ -124,8 +198,10 @@ $light_gray: #eee;
     width: 30px;
     display: inline-block;
   }
+
   .title-container {
     position: relative;
+
     .title {
       font-size: 26px;
       color: $light_gray;
@@ -133,14 +209,6 @@ $light_gray: #eee;
       text-align: center;
       font-weight: bold;
     }
-  }
-  .login-tips {
-    font-size: 16px;
-    text-align: center;
-    width: 100%;
-    margin-bottom: 20px;
-    padding: 4px 0;
-    box-sizing: content-box;
   }
 }
 </style>
