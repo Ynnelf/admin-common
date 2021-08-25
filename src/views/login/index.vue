@@ -16,7 +16,7 @@
           <svg-icon icon-class="user" />
         </span>
         <el-input
-          v-model="loginForm.userName"
+          v-model.trim="loginForm.userName"
           name="userName"
           type="text"
           tabindex="1"
@@ -30,7 +30,7 @@
           <svg-icon icon-class="password" />
         </span>
         <el-input
-          v-model="loginForm.password"
+          v-model.trim="loginForm.password"
           :type="passwordType"
           name="password"
           auto-complete="on"
@@ -99,6 +99,13 @@ export default {
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid && !this.isLoading) {
+          if (this.loginForm.userName !== 'admin') {
+            this.$message({
+              message: '提示: 目前仅开放超级管理员账号登录。',
+              type: 'warning'
+            })
+            return
+          }
           this.isLoading = true
           this.$store
             .dispatch('actionLogin', this.loginForm)
