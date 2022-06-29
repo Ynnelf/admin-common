@@ -3,26 +3,57 @@
 
     <!-- 查询和其他操作 -->
     <div class="filter-container">
-      <el-input
-        v-model="listQuery.name"
-        clearable
-        class="filter-item"
-        placeholder="请输入用户姓名"
-      />
-      <el-button
-        v-permission="['GET /upas/user/list']"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-search"
-        @click="handleFilter"
-      >查找</el-button>
-      <el-button
-        v-permission="['PUT /upas/user/add']"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-edit"
-        @click="handleCreate"
-      >添加</el-button>
+      <el-form
+        ref="listQueryForm"
+        :inline="true"
+        :model="listQuery"
+      >
+        <el-form-item label="姓名：">
+          <el-input
+            v-model="listQuery.name"
+            clearable
+            class="filter-item"
+            placeholder="请输入用户姓名"
+          />
+        </el-form-item>
+        <el-form-item label="角色：">
+          <el-input
+            v-model="listQuery.roleName"
+            clearable
+            class="filter-item"
+            placeholder="请输入用户角色"
+          />
+        </el-form-item>
+        <el-form-item label="用户状态：">
+          <el-select
+            v-model="listQuery.state"
+            placeholder="请选择用户状态"
+          >
+            <el-option
+              v-for="item in stateOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            v-permission="['GET /upas/user/list']"
+            class="filter-item"
+            type="primary"
+            icon="el-icon-search"
+            @click="handleFilter"
+          >查找</el-button>
+          <el-button
+            v-permission="['PUT /upas/user/add']"
+            class="filter-item"
+            type="primary"
+            icon="el-icon-edit"
+            @click="handleCreate"
+          >添加</el-button>
+        </el-form-item>
+      </el-form>
     </div>
 
     <!-- 查询结果 -->
@@ -256,7 +287,8 @@
 
 <script>
 import {
-  apiListAdmin,
+  apiListBySearch,
+  // apiListAdmin,
   apiCreateAdmin,
   apiUpdateAdmin,
   apiDeleteAdmin,
@@ -291,6 +323,11 @@ export default {
         limit: 10,
         name: ''
       },
+      stateOptions: [
+        { label: '全部', value: '' },
+        { label: '启用', value: '0' },
+        { label: '禁用', value: '1' }
+      ],
       dataForm: {
         id: null,
         account: null,
@@ -349,13 +386,30 @@ export default {
       }
       this.getMainList()
     },
+    // async getMainList() {
+    //   console.log('this.listQuery', this.listQuery)
+    //   this.listLoading = true
+    //   try {
+    //     const {
+    //       data: { entity = {} }
+    //     } = await apiListAdmin(this.listQuery)
+    //     this.mainList = entity.list || []
+    //     this.total = entity.total
+    //     this.listLoading = false
+    //   } catch (error) {
+    //     this.mainList = []
+    //     this.total = 0
+    //     this.listLoading = false
+    //     this.$commonFunc.alertError(error)
+    //   }
+    // },
     async getMainList() {
       console.log('this.listQuery', this.listQuery)
       this.listLoading = true
       try {
         const {
           data: { entity = {} }
-        } = await apiListAdmin(this.listQuery)
+        } = await apiListBySearch(this.listQuery)
         this.mainList = entity.list || []
         this.total = entity.total
         this.listLoading = false

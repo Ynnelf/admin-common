@@ -51,6 +51,15 @@ export const apiListAdmin = params => {
   })
 }
 
+//
+export const apiListBySearch = params => {
+  return request({
+    url: PREFIX_AUTH + '/user/listBySearch',
+    method: 'get',
+    params
+  })
+}
+
 export const apiCreateAdmin = params => {
   return request({
     url: PREFIX_AUTH + '/user/add',
